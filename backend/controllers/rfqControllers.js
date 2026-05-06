@@ -84,7 +84,6 @@ export const getRFQById = (req, res) => {
   });
 };
 
-
 export const submitBid = (req, res) => {
   const rfqId = Number(req.params.id);
   const rfq = rfqs.find((item) => item.id === rfqId);
@@ -93,6 +92,23 @@ export const submitBid = (req, res) => {
       message: "RFQ not found",
     });
   }
+
+  if (rfq.status !== "ACTIVE") {
+    return res.status(400).json({
+      message: "Auction is not active",
+    });
+  }
+
+  const now = new Date();
+  const forcedBidCloseTime = new Date(rfq.forced_bid_close_time);
+
+  if (now > forcedBidCloseTime) {
+    return res.status(400).json({
+      message: "Auction is force closed. Bidding is not allowed.",
+    });
+  }
+
+
   const totalAmount =
     Number(req.body.freight_charges) +
     Number(req.body.origin_charges) +

@@ -8,4 +8,3 @@ router.get("/", getAllRFQs);
 router.get("/:id", getRFQById);
 router.post("/:id/bids", submitBid);
 export default router;
-
