@@ -45,7 +45,6 @@ export const getAllRFQs = (req, res) => {
   res.status(200).json({
     message: "RFQs fetched successfully",
     data: rfqs,
-
   });
 };
 
@@ -60,7 +59,6 @@ export const getRFQById = (req, res) => {
   const auctionConfig = auctionConfigs.find(
     (config) => config.rfq_id === rfqId
   );
-
   const rfqBids = bids
     .filter((bid) => bid.rfq_id === rfqId)
     .sort((a, b) => a.total_amount - b.total_amount)
@@ -70,11 +68,9 @@ export const getRFQById = (req, res) => {
         rank: `L${index + 1}`,
       };
     });
-
   const rfqLogs = auctionActivityLogs.filter(
     (log) => log.rfq_id === rfqId
   );
-
   res.status(200).json({
     message: "RFQ fetched successfully",
     data: rfq,
@@ -85,6 +81,11 @@ export const getRFQById = (req, res) => {
 };
 
 export const submitBid = (req, res) => {
+   if (!req.body.supplier_name) {
+    return res.status(400).json({
+      message: "supplier_name is required",
+    });
+  }
   const rfqId = Number(req.params.id);
   const rfq = rfqs.find((item) => item.id === rfqId);
   if (!rfq) {
@@ -92,34 +93,59 @@ export const submitBid = (req, res) => {
       message: "RFQ not found",
     });
   }
-
   if (rfq.status !== "ACTIVE") {
     return res.status(400).json({
       message: "Auction is not active",
     });
   }
+ 
+  const auctionConfig = auctionConfigs.find(
+    (config) => config.rfq_id === rfqId
+  );
 
-  const now = new Date();
-  const forcedBidCloseTime = new Date(rfq.forced_bid_close_time);
-
-  if (now > forcedBidCloseTime) {
-    return res.status(400).json({
-      message: "Auction is force closed. Bidding is not allowed.",
+  if (!auctionConfig) {
+    return res.status(404).json({
+      message: "Auction configuration not found",
     });
   }
 
+  const now = new Date();
+  
+  const forcedBidCloseTime = new Date(rfq.forced_bid_close_time);
+  const currentBidCloseTime = new Date(
+    rfq.bid_close_time
+  );
+  if (now > currentBidCloseTime || now > forcedBidCloseTime) {
+    return res.status(400).json({
+      message: "Auction is closed. Bidding is not allowed.",
+    });
+  }
 
-  const totalAmount =
-    Number(req.body.freight_charges) +
-    Number(req.body.origin_charges) +
-    Number(req.body.destination_charges);
+  const triggerWindowStart = new Date(
+    currentBidCloseTime.getTime() -
+      auctionConfig.trigger_window_minutes * 60 * 1000
+  );
+
+  const isInsideTriggerWindow =now >= triggerWindowStart && now <= currentBidCloseTime;
+  
+  const freight = Number(req.body.freight_charges);
+  const origin = Number(req.body.origin_charges);
+  const destination = Number(req.body.destination_charges);
+
+  if (Number.isNaN(freight) || Number.isNaN(origin) || Number.isNaN(destination)) {
+    return res.status(400).json({
+      message: "freight_charges, origin_charges, and destination_charges must be numbers",
+    });
+  }
+
+  const totalAmount = freight + origin + destination;
   const newBid = {
     id: bids.length + 1,
     rfq_id: rfqId,
     supplier_name: req.body.supplier_name,
-    freight_charges: req.body.freight_charges,
-    origin_charges: req.body.origin_charges,
-    destination_charges: req.body.destination_charges,
+    freight_charges: freight,
+    origin_charges: origin,
+    destination_charges: destination,
     total_amount: totalAmount,
     transit_time: req.body.transit_time,
     quote_validity: req.body.quote_validity,
@@ -136,19 +162,40 @@ export const submitBid = (req, res) => {
     new_bid_close_time: null,
     created_at: new Date(),
   };
-
   auctionActivityLogs.push(bidLog);
+  if (isInsideTriggerWindow) {
+    const extendedCloseTime = new Date(
+      currentBidCloseTime.getTime() +
+        auctionConfig.extension_duration_minutes *
+          60 *
+          1000
+    );
 
+    const finalCloseTime =
+      extendedCloseTime > forcedBidCloseTime
+        ? forcedBidCloseTime
+        : extendedCloseTime;
+
+    const oldCloseTime = rfq.bid_close_time;
+
+    rfq.bid_close_time = finalCloseTime.toISOString();
+
+    const extensionLog = {
+      id: auctionActivityLogs.length + 1,
+      rfq_id: rfqId,
+      activity_type: "TIME_EXTENDED",
+      message: `Auction extended due to bid submission by ${req.body.supplier_name}`,
+      old_bid_close_time: oldCloseTime,
+      new_bid_close_time: finalCloseTime.toISOString(),
+      created_at: new Date(),
+    };
+
+    auctionActivityLogs.push(extensionLog);
+  }
   res.status(201).json({
     message: "Bid submitted successfully",
     data: newBid,
   });
 };
-
-
-
-
-
-
 
 
