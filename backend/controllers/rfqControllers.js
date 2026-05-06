@@ -1,6 +1,7 @@
 let rfqs = [];
 let auctionConfigs=[];
 let bids = [];
+let auctionActivityLogs = [];
 
 export const createRFQ = (req, res) => {
 
@@ -70,11 +71,16 @@ export const getRFQById = (req, res) => {
       };
     });
 
+  const rfqLogs = auctionActivityLogs.filter(
+    (log) => log.rfq_id === rfqId
+  );
+
   res.status(200).json({
     message: "RFQ fetched successfully",
     data: rfq,
     auction_config: auctionConfig,
     bids: rfqBids,
+    logs: rfqLogs,
   });
 };
 
@@ -104,11 +110,25 @@ export const submitBid = (req, res) => {
     created_at: new Date(),
   };
   bids.push(newBid);
+
+  const bidLog = {
+    id: auctionActivityLogs.length + 1,
+    rfq_id: rfqId,
+    activity_type: "BID_SUBMITTED",
+    message: `${req.body.supplier_name} submitted a bid with total amount ${totalAmount}`,
+    old_bid_close_time: null,
+    new_bid_close_time: null,
+    created_at: new Date(),
+  };
+
+  auctionActivityLogs.push(bidLog);
+
   res.status(201).json({
     message: "Bid submitted successfully",
     data: newBid,
   });
 };
+
 
 
 
