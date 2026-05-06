@@ -59,14 +59,49 @@ export const getRFQById = (req, res) => {
   const auctionConfig = auctionConfigs.find(
     (config) => config.rfq_id === rfqId
   );
+
+  const rfqBids = bids
+  .filter((bid) => bid.rfq_id === rfqId)
+  .sort((a, b) => a.total_amount - b.total_amount);
+
   res.status(200).json({
     message: "RFQ fetched successfully",
     data: rfq,
     auction_config: auctionConfig,
+    bids: rfqBids,
   });
 };
 
-
+export const submitBid = (req, res) => {
+  const rfqId = Number(req.params.id);
+  const rfq = rfqs.find((item) => item.id === rfqId);
+  if (!rfq) {
+    return res.status(404).json({
+      message: "RFQ not found",
+    });
+  }
+  const totalAmount =
+    Number(req.body.freight_charges) +
+    Number(req.body.origin_charges) +
+    Number(req.body.destination_charges);
+  const newBid = {
+    id: bids.length + 1,
+    rfq_id: rfqId,
+    supplier_name: req.body.supplier_name,
+    freight_charges: req.body.freight_charges,
+    origin_charges: req.body.origin_charges,
+    destination_charges: req.body.destination_charges,
+    total_amount: totalAmount,
+    transit_time: req.body.transit_time,
+    quote_validity: req.body.quote_validity,
+    created_at: new Date(),
+  };
+  bids.push(newBid);
+  res.status(201).json({
+    message: "Bid submitted successfully",
+    data: newBid,
+  });
+};
 
 
 
