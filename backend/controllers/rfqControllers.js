@@ -61,8 +61,14 @@ export const getRFQById = (req, res) => {
   );
 
   const rfqBids = bids
-  .filter((bid) => bid.rfq_id === rfqId)
-  .sort((a, b) => a.total_amount - b.total_amount);
+    .filter((bid) => bid.rfq_id === rfqId)
+    .sort((a, b) => a.total_amount - b.total_amount)
+    .map((bid, index) => {
+      return {
+        ...bid,
+        rank: `L${index + 1}`,
+      };
+    });
 
   res.status(200).json({
     message: "RFQ fetched successfully",
@@ -71,6 +77,7 @@ export const getRFQById = (req, res) => {
     bids: rfqBids,
   });
 };
+
 
 export const submitBid = (req, res) => {
   const rfqId = Number(req.params.id);
