@@ -12,11 +12,27 @@ function RFQListPage() {
     <div>
       <h2>RFQ Listing Page</h2>
       {rfqs.map((rfq) => (
-        <div key={rfq.id}>
+        <div className="rfq-card" key={rfq.id}>
           <h3>{rfq.rfq_name}</h3>
-          <p>Reference: {rfq.reference_id}</p>
-          <p>Status: {rfq.status}</p>
-          <p>Lowest Bid: {rfq.current_lowest_bid ?? "No bids yet"}</p>
+          <p>
+            <strong>Reference ID:</strong>{" "}
+            {rfq.reference_id}
+          </p>
+          <p>
+            <strong>Status:</strong> {rfq.status}
+          </p>
+          <p>
+            <strong>Lowest Bid:</strong>{" "}
+            {rfq.current_lowest_bid ?? "No bids yet"}
+          </p>
+          <p>
+            <strong>Bid Close Time:</strong>{" "}
+            {rfq.bid_close_time}
+          </p>
+          <p>
+            <strong>Forced Close Time:</strong>{" "}
+            {rfq.forced_bid_close_time}
+          </p>
         </div>
       ))}
     </div>
