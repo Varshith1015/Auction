@@ -20,3 +20,9 @@ export const createRFQ = async (formData) => {
   const data = await response.json();
   return data;
 };
+
+export const getRFQById = async (id) => {
+  const response = await fetch(`${API_BASE_URL}/rfqs/${id}`);
+  const data = await response.json();
+  return data;
+};
