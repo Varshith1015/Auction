@@ -5,6 +5,26 @@ let auctionActivityLogs = [];
 
 export const createRFQ = (req, res) => {
 
+  const requiredFields = [
+    "rfq_name",
+    "reference_id",
+    "bid_start_time",
+    "bid_close_time",
+    "forced_bid_close_time",
+    "pickup_service_date",
+    "trigger_window_minutes",
+    "extension_duration_minutes",
+    "extension_trigger_type",
+  ];
+
+  for (const field of requiredFields) {
+    if (!req.body[field]) {
+      return res.status(400).json({
+        message: `${field} is required`,
+      });
+    }
+  }
+
   const bidCloseTime = new Date(req.body.bid_close_time);
   const forcedBidCloseTime = new Date(req.body.forced_bid_close_time);
   if (forcedBidCloseTime <= bidCloseTime) {
@@ -42,9 +62,25 @@ export const createRFQ = (req, res) => {
 };
 
 export const getAllRFQs = (req, res) => {
+  const rfqList = rfqs.map((rfq) => {
+    const rfqBids = bids.filter((bid) => bid.rfq_id === rfq.id);
+    const lowestBid =
+      rfqBids.length > 0
+        ? Math.min(...rfqBids.map((bid) => bid.total_amount))
+        : null;
+    return {
+      id: rfq.id,
+      rfq_name: rfq.rfq_name,
+      reference_id: rfq.reference_id,
+      current_lowest_bid: lowestBid,
+      bid_close_time: rfq.bid_close_time,
+      forced_bid_close_time: rfq.forced_bid_close_time,
+      status: rfq.status,
+    };
+  });
   res.status(200).json({
     message: "RFQs fetched successfully",
-    data: rfqs,
+    data: rfqList,
   });
 };
 
@@ -81,6 +117,8 @@ export const getRFQById = (req, res) => {
 };
 
 export const submitBid = (req, res) => {
+
+
    if (!req.body.supplier_name) {
     return res.status(400).json({
       message: "supplier_name is required",
@@ -109,15 +147,34 @@ export const submitBid = (req, res) => {
     });
   }
 
+  const requiredBidFields = [
+    "supplier_name",
+    "freight_charges",
+    "origin_charges",
+    "destination_charges",
+    "transit_time",
+    "quote_validity",
+  ];
+
+  for (const field of requiredBidFields) {
+    if (!req.body[field]) {
+      return res.status(400).json({
+        message: `${field} is required`,
+      });
+    }
+  }
+
   const now = new Date();
   
   const forcedBidCloseTime = new Date(rfq.forced_bid_close_time);
   const currentBidCloseTime = new Date(
     rfq.bid_close_time
   );
-  if (now > currentBidCloseTime || now > forcedBidCloseTime) {
+  if (now > forcedBidCloseTime) {
+    rfq.status = "FORCE_CLOSED";
+
     return res.status(400).json({
-      message: "Auction is closed. Bidding is not allowed.",
+      message: "Auction is force closed. Bidding is not allowed.",
     });
   }
 
@@ -151,7 +208,22 @@ export const submitBid = (req, res) => {
     quote_validity: req.body.quote_validity,
     created_at: new Date(),
   };
+
+  const previousRankings = bids
+  .filter((bid) => bid.rfq_id === rfqId)
+  .sort((a, b) => a.total_amount - b.total_amount)
+  .map((bid) => bid.supplier_name);
+
   bids.push(newBid);
+  const newRankings = bids
+    .filter((bid) => bid.rfq_id === rfqId)
+    .sort((a, b) => a.total_amount - b.total_amount)
+    .map((bid) => bid.supplier_name);
+  const isAnyRankChanged =
+    previousRankings.join(",") !== newRankings.join(",");
+  const previousL1 = previousRankings[0];
+  const newL1 = newRankings[0];
+  const isL1Changed = previousL1 !== newL1;
 
   const bidLog = {
     id: auctionActivityLogs.length + 1,
@@ -163,24 +235,44 @@ export const submitBid = (req, res) => {
     created_at: new Date(),
   };
   auctionActivityLogs.push(bidLog);
-  if (isInsideTriggerWindow) {
+  let extensionReason = "";
+  if (
+    isInsideTriggerWindow &&
+    auctionConfig.extension_trigger_type === "BID_RECEIVED"
+  ) {
+    extensionReason = "Bid received inside trigger window";
+  }
+  if (
+    isInsideTriggerWindow &&
+    auctionConfig.extension_trigger_type === "ANY_RANK_CHANGE" &&
+    isAnyRankChanged
+  ) {
+    extensionReason = "Supplier ranking changed inside trigger window";
+  }
+  if (
+    isInsideTriggerWindow &&
+    auctionConfig.extension_trigger_type === "L1_CHANGE" &&
+    isL1Changed
+  ) {
+    extensionReason = "Lowest bidder changed inside trigger window";
+  }
+  const shouldExtend = extensionReason !== "";
+  let extensionLog = null;
+  if (shouldExtend) {
     const extendedCloseTime = new Date(
       currentBidCloseTime.getTime() +
         auctionConfig.extension_duration_minutes *
           60 *
           1000
     );
-
     const finalCloseTime =
       extendedCloseTime > forcedBidCloseTime
         ? forcedBidCloseTime
         : extendedCloseTime;
-
     const oldCloseTime = new Date(rfq.bid_close_time);
-
     rfq.bid_close_time = finalCloseTime.toISOString();
 
-    const extensionLog = {
+    extensionLog = {
       id: auctionActivityLogs.length + 1,
       rfq_id: rfqId,
       activity_type: "TIME_EXTENDED",
@@ -189,12 +281,38 @@ export const submitBid = (req, res) => {
       new_bid_close_time: finalCloseTime.toISOString(),
       created_at: new Date(),
     };
-
     auctionActivityLogs.push(extensionLog);
   }
   res.status(201).json({
     message: "Bid submitted successfully",
     data: newBid,
+    auction_extended: shouldExtend,
+    extension_log: extensionLog,
+    updated_bid_close_time: rfq.bid_close_time,
   });
 };
 
+export const closeAuction = (req, res) => {
+  const rfqId = Number(req.params.id);
+  const rfq = rfqs.find((item) => item.id === rfqId);
+  if (!rfq) {
+    return res.status(404).json({
+      message: "RFQ not found",
+    });
+  }
+  rfq.status = "CLOSED";
+  const closeLog = {
+    id: auctionActivityLogs.length + 1,
+    rfq_id: rfqId,
+    activity_type: "AUCTION_CLOSED",
+    message: "Auction closed manually",
+    old_bid_close_time: null,
+    new_bid_close_time: null,
+    created_at: new Date(),
+  };
+  auctionActivityLogs.push(closeLog);
+  res.status(200).json({
+    message: "Auction closed successfully",
+    data: rfq,
+  });
+};
