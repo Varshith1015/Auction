@@ -33,6 +33,8 @@ function RFQListPage({ refreshKey }) {
             <strong>Forced Close Time:</strong>{" "}
             {rfq.forced_bid_close_time}
           </p>
+
+          <button>View Details</button>
         </div>
       ))}
     </div>
