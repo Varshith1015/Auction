@@ -1,0 +1,53 @@
+[33mcommit 228959ba4b150d87abb469c4fbc5965684ed67d3[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m)[m
+Author: varshith <varshithravipati2003@gmail.com>
+Date:   Thu May 7 15:36:08 2026 +0530
+
+    Added close auction API's, improved auction listing response, added trigger type checks, also added validation checks for RFQ creation and bid submission
+
+[33mcommit 976541c0ae7f3ed83100203f92cfa09e8317719f[m[33m ([m[1;31morigin/main[m[33m)[m
+Author: varshith <varshithravipati2003@gmail.com>
+Date:   Thu May 7 11:17:13 2026 +0530
+
+    Updated auction extension logic
+
+[33mcommit 2a7da4674be336a8440d86a11d0016bb432d42b7[m
+Author: varshith <varshithravipati2003@gmail.com>
+Date:   Wed May 6 21:43:33 2026 +0530
+
+    Implemented auction extension logic
+
+[33mcommit 0fd85877222f63739c7120503c0dc20886cf923f[m
+Author: varshith <varshithravipati2003@gmail.com>
+Date:   Wed May 6 19:21:47 2026 +0530
+
+    Check auction time before accepting bid
+
+[33mcommit 0f6196e384b61f5f14cce9808de429e3c49a0c95[m
+Author: varshith <varshithravipati2003@gmail.com>
+Date:   Wed May 6 17:08:54 2026 +0530
+
+    Added activity logs for bid submission
+
+[33mcommit b052bb0b023d2abb2a98056050e075fa882fdd56[m
+Author: varshith <varshithravipati2003@gmail.com>
+Date:   Wed May 6 16:46:51 2026 +0530
+
+    Added supplie rankings to bids
+
+[33mcommit 9bffa60fe52accddf8bdfc078101b7645081657c[m
+Author: varshith <varshithravipati2003@gmail.com>
+Date:   Wed May 6 16:35:40 2026 +0530
+
+    Added bid submission API and updated show bids api so that it returns bids also
+
+[33mcommit 90947a76abb4170eebf40e225df1f188940ef398[m
+Author: varshith <varshithravipati2003@gmail.com>
+Date:   Wed May 6 16:28:47 2026 +0530
+
+    Implemented RFQ management API's
+
+[33mcommit 2190cdacf5cad227b0b91e7aa639a3dd78214dbf[m
+Author: varshith <varshithravipati2003@gmail.com>
+Date:   Tue Apr 28 18:41:36 2026 +0530
+
+    Initial commit

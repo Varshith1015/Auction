@@ -25,6 +25,20 @@ export const createRFQ = (req, res) => {
     }
   }
 
+  const allowedTriggerTypes = [
+    "BID_RECEIVED",
+    "ANY_RANK_CHANGE",
+    "L1_CHANGE",
+  ];
+
+  if (!allowedTriggerTypes.includes(req.body.extension_trigger_type)) {
+    return res.status(400).json({
+      message:
+        "extension_trigger_type must be BID_RECEIVED, ANY_RANK_CHANGE, or L1_CHANGE",
+    });
+  }
+  
+
   const bidCloseTime = new Date(req.body.bid_close_time);
   const forcedBidCloseTime = new Date(req.body.forced_bid_close_time);
   if (forcedBidCloseTime <= bidCloseTime) {
