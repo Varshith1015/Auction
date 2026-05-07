@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { createRFQ } from "../services/api";
 
 function CreateRFQPage() {
 
@@ -20,10 +21,23 @@ function CreateRFQPage() {
         });
     };
 
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        try {
+            const response = await createRFQ(formData);
+
+            console.log(response);
+            alert("RFQ created successfully");
+        } catch (error) {
+            console.error(error);
+            alert("Failed to create RFQ");
+        }
+    };
+
   return (
     <div>
       <h2>Create RFQ Page</h2>
-      <form>
+      <form onSubmit={handleSubmit}>
         <div>
           <label>RFQ Name</label>
           <br />
