@@ -29,6 +29,17 @@ function CreateRFQPage({ onRFQCreated }) {
             console.log(response);
             alert("RFQ created successfully");
             onRFQCreated(); // Call the callback to refresh the RFQ list
+            setFormData({
+                rfq_name: "",
+                reference_id: "",
+                bid_start_time: "",
+                bid_close_time: "",
+                forced_bid_close_time: "",
+                pickup_service_date: "",
+                trigger_window_minutes: "",
+                extension_duration_minutes: "",
+                extension_trigger_type: "BID_RECEIVED",
+            }); // Reset form after successful creation
         } catch (error) {
             console.error(error);
             alert("Failed to create RFQ");
