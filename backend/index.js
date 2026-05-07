@@ -9,6 +9,11 @@ const PORT = process.env.PORT || 5000;
 app.use(cors());
 app.use(express.json());
 
+
+app.get("/", (req, res) => {
+  res.send("Welcome to the RFQ Management System API");
+});
+
 app.use("/api/rfq", rfqRoutes); 
 
 app.listen(PORT, () => {
