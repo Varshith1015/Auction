@@ -176,7 +176,7 @@ export const submitBid = (req, res) => {
         ? forcedBidCloseTime
         : extendedCloseTime;
 
-    const oldCloseTime = rfq.bid_close_time;
+    const oldCloseTime = new Date(rfq.bid_close_time);
 
     rfq.bid_close_time = finalCloseTime.toISOString();
 
@@ -185,7 +185,7 @@ export const submitBid = (req, res) => {
       rfq_id: rfqId,
       activity_type: "TIME_EXTENDED",
       message: `Auction extended due to bid submission by ${req.body.supplier_name}`,
-      old_bid_close_time: oldCloseTime,
+      old_bid_close_time: oldCloseTime.toISOString(),
       new_bid_close_time: finalCloseTime.toISOString(),
       created_at: new Date(),
     };
@@ -197,5 +197,4 @@ export const submitBid = (req, res) => {
     data: newBid,
   });
 };
-
 
