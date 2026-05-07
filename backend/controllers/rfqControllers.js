@@ -37,7 +37,7 @@ export const createRFQ = (req, res) => {
         "extension_trigger_type must be BID_RECEIVED, ANY_RANK_CHANGE, or L1_CHANGE",
     });
   }
-  
+
 
   const bidCloseTime = new Date(req.body.bid_close_time);
   const forcedBidCloseTime = new Date(req.body.forced_bid_close_time);
@@ -78,10 +78,17 @@ export const createRFQ = (req, res) => {
 export const getAllRFQs = (req, res) => {
   const rfqList = rfqs.map((rfq) => {
     const rfqBids = bids.filter((bid) => bid.rfq_id === rfq.id);
-    const lowestBid =
-      rfqBids.length > 0
-        ? Math.min(...rfqBids.map((bid) => bid.total_amount))
-        : null;
+    const lowestBid =rfqBids.length > 0? Math.min(...rfqBids.map((bid) => bid.total_amount)): null;
+
+    const now = new Date();
+    const currentBidCloseTime = new Date(rfq.bid_close_time);
+    const forcedBidCloseTime = new Date(rfq.forced_bid_close_time);
+    if (now > forcedBidCloseTime) {
+      rfq.status = "FORCE_CLOSED";
+    } else if (now > currentBidCloseTime) {
+      rfq.status = "CLOSED";
+    }    
+
     return {
       id: rfq.id,
       rfq_name: rfq.rfq_name,
@@ -179,17 +186,16 @@ export const submitBid = (req, res) => {
   }
 
   const now = new Date();
-  
-  const forcedBidCloseTime = new Date(rfq.forced_bid_close_time);
-  const currentBidCloseTime = new Date(
-    rfq.bid_close_time
+
+  const currentBidCloseTime = new Date(rfq.bid_close_time);
+  const forcedBidCloseTime = new Date(
+    rfq.forced_bid_close_time
   );
+
   if (now > forcedBidCloseTime) {
     rfq.status = "FORCE_CLOSED";
-
-    return res.status(400).json({
-      message: "Auction is force closed. Bidding is not allowed.",
-    });
+  } else if (now > currentBidCloseTime) {
+    rfq.status = "CLOSED";
   }
 
   const triggerWindowStart = new Date(
