@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { getAllRFQs } from "../services/api";
 
-function RFQListPage({ refreshKey }) {
+function RFQListPage({ refreshKey, onViewDetails }) {
   const [rfqs, setRfqs] = useState([]);
   useEffect(() => {
     getAllRFQs().then((response) => {
@@ -34,7 +34,7 @@ function RFQListPage({ refreshKey }) {
             {rfq.forced_bid_close_time}
           </p>
 
-          <button>View Details</button>
+          <button onClick={() => onViewDetails(rfq.id)}>View Details</button>
         </div>
       ))}
     </div>
