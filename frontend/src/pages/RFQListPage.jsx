@@ -1,13 +1,13 @@
 import { useEffect, useState } from "react";
 import { getAllRFQs } from "../services/api";
 
-function RFQListPage() {
+function RFQListPage({ refreshKey }) {
   const [rfqs, setRfqs] = useState([]);
   useEffect(() => {
     getAllRFQs().then((response) => {
       setRfqs(response.data);
     });
-  }, []);
+  }, [refreshKey]); // Re-fetch RFQs whenever refreshKey changes
   return (
     <div>
       <h2>RFQ Listing Page</h2>

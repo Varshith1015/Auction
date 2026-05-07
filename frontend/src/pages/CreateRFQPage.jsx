@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { createRFQ } from "../services/api";
 
-function CreateRFQPage() {
+function CreateRFQPage({ onRFQCreated }) {
 
     const [formData, setFormData] = useState({
         rfq_name: "",
@@ -28,6 +28,7 @@ function CreateRFQPage() {
 
             console.log(response);
             alert("RFQ created successfully");
+            onRFQCreated(); // Call the callback to refresh the RFQ list
         } catch (error) {
             console.error(error);
             alert("Failed to create RFQ");
