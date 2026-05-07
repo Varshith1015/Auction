@@ -16,3 +16,19 @@ h1 {
   border-radius: 8px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
+
+form div {
+  margin-bottom: 12px;
+}
+
+input,
+select {
+  padding: 8px;
+  width: 300px;
+  margin-top: 4px;
+}
+
+button {
+  padding: 10px 16px;
+  cursor: pointer;
+}
