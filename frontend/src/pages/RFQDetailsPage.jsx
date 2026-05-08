@@ -102,81 +102,88 @@ function RFQDetailsPage({ rfqId, onBack }) {
         <p><strong>Trigger Type:</strong> {auction_config.extension_trigger_type}</p>
       </div>
 
-      <div className="rfq-card">
-        <h3>Submit Bid</h3>
+      {rfq.status === "ACTIVE" && (
+            <div className="rfq-card">
+                <h3>Submit Bid</h3>
 
-        <form onSubmit={handleBidSubmit}>
-            <div>
-            <label>Supplier Name</label>
-            <br />
-            <input
-                type="text"
-                name="supplier_name"
-                value={bidForm.supplier_name}
-                onChange={handleBidChange}
-            />
+                <form onSubmit={handleBidSubmit}>
+                {/* your existing bid form fields */}
+                    <div>
+                        <label>Supplier Name</label>
+                        <br />
+                        <input
+                            type="text"
+                            name="supplier_name"
+                            value={bidForm.supplier_name}
+                            onChange={handleBidChange}
+                        />
+                        </div>
+
+                        <div>
+                        <label>Freight Charges</label>
+                        <br />
+                        <input
+                            type="number"
+                            name="freight_charges"
+                            value={bidForm.freight_charges}
+                            onChange={handleBidChange}
+                        />
+                        </div>
+
+                        <div>
+                        <label>Origin Charges</label>
+                        <br />
+                        <input
+                            type="number"
+                            name="origin_charges"
+                            value={bidForm.origin_charges}
+                            onChange={handleBidChange}
+                        />
+                        </div>
+
+                        <div>
+                        <label>Destination Charges</label>
+                        <br />
+                        <input
+                            type="number"
+                            name="destination_charges"
+                            value={bidForm.destination_charges}
+                            onChange={handleBidChange}
+                        />
+                        </div>
+
+                        <div>
+                        <label>Transit Time</label>
+                        <br />
+                        <input
+                            type="text"
+                            name="transit_time"
+                            value={bidForm.transit_time}
+                            onChange={handleBidChange}
+                        />
+                        </div>
+
+                        <div>
+                        <label>Quote Validity</label>
+                        <br />
+                        <input
+                            type="text"
+                            name="quote_validity"
+                            value={bidForm.quote_validity}
+                            onChange={handleBidChange}
+                        />
+                    </div>
+                    <button type="submit">Submit Bid</button>
+                </form>
             </div>
+        )}
 
-            <div>
-            <label>Freight Charges</label>
-            <br />
-            <input
-                type="number"
-                name="freight_charges"
-                value={bidForm.freight_charges}
-                onChange={handleBidChange}
-            />
+        {rfq.status !== "ACTIVE" && (
+            <div className="rfq-card">
+                <p>Bidding is closed for this auction.</p>
             </div>
+        )}
 
-            <div>
-            <label>Origin Charges</label>
-            <br />
-            <input
-                type="number"
-                name="origin_charges"
-                value={bidForm.origin_charges}
-                onChange={handleBidChange}
-            />
-            </div>
-
-            <div>
-            <label>Destination Charges</label>
-            <br />
-            <input
-                type="number"
-                name="destination_charges"
-                value={bidForm.destination_charges}
-                onChange={handleBidChange}
-            />
-            </div>
-
-            <div>
-            <label>Transit Time</label>
-            <br />
-            <input
-                type="text"
-                name="transit_time"
-                value={bidForm.transit_time}
-                onChange={handleBidChange}
-            />
-            </div>
-
-            <div>
-            <label>Quote Validity</label>
-            <br />
-            <input
-                type="text"
-                name="quote_validity"
-                value={bidForm.quote_validity}
-                onChange={handleBidChange}
-            />
-            </div>
-
-            <button type="submit">
-            Submit Bid
-            </button>
-        </form>
-      </div>
 
       <div className="rfq-card">
         <h3>Supplier Bids</h3>
