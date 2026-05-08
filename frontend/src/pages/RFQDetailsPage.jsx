@@ -47,8 +47,12 @@ function RFQDetailsPage({ rfqId, onBack }) {
             rfqId,
             bidForm
             );
-
             console.log(response);
+
+            if (!response.data) {
+                alert(response.message);
+                return;
+            }
 
         alert("Bid submitted successfully");
             const updatedRFQ = await getRFQById(rfqId);
@@ -57,17 +61,17 @@ function RFQDetailsPage({ rfqId, onBack }) {
             console.error(error);
             alert("Failed to submit bid");
         }
+
+        setBidForm({
+            supplier_name: "",
+            freight_charges: "",
+            origin_charges: "",
+            destination_charges: "",
+            transit_time: "",
+            quote_validity: "",
+        });
     };
-    setBidForm({
-        supplier_name: "",
-        freight_charges: "",
-        origin_charges: "",
-        destination_charges: "",
-        transit_time: "",
-        quote_validity: "",
-    });
-
-
+    
   return (
     <div>
       <button onClick={onBack}>Back to List</button>
