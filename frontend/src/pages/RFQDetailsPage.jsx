@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { getRFQById, submitBid } from "../services/api";
+import { getRFQById, submitBid ,closeAuction} from "../services/api";
 
 function RFQDetailsPage({ rfqId, onBack }) {
   const [rfqDetails, setRfqDetails] = useState(null);
@@ -41,7 +41,6 @@ function RFQDetailsPage({ rfqId, onBack }) {
 
     const handleBidSubmit = async (e) => {
         e.preventDefault();
-
         try {
             const response = await submitBid(
             rfqId,
@@ -53,7 +52,6 @@ function RFQDetailsPage({ rfqId, onBack }) {
                 alert(response.message);
                 return;
             }
-
             alert("Bid submitted successfully");
             setBidForm({
                 supplier_name: "",
@@ -68,6 +66,18 @@ function RFQDetailsPage({ rfqId, onBack }) {
         } catch (error) {
             console.error(error);
             alert("Failed to submit bid");
+        }
+    };
+
+    const handleCloseAuction = async () => {
+        try {
+            const response = await closeAuction(rfqId);
+            alert(response.message);
+            const updatedRFQ = await getRFQById(rfqId);
+            setRfqDetails(updatedRFQ);
+        } catch (error) {
+            console.error(error);
+            alert("Failed to close auction");
         }
     };
     
@@ -255,8 +265,8 @@ function RFQDetailsPage({ rfqId, onBack }) {
             ))
         )}
       </div>
+      <button onClick={handleCloseAuction}>Close Auction</button>
     </div>
   );
 }
-
 export default RFQDetailsPage;

@@ -27,7 +27,6 @@ export const getRFQById = async (id) => {
   return data;
 };
 
-
 export const submitBid = async (rfqId, bidData) => {
   const response = await fetch(`${API_BASE_URL}/rfq/${rfqId}/bids`, {
     method: "POST",
@@ -36,6 +35,17 @@ export const submitBid = async (rfqId, bidData) => {
     },
     body: JSON.stringify(bidData),
   });
+  const data = await response.json();
+  return data;
+};
+
+export const closeAuction = async (rfqId) => {
+  const response = await fetch(
+    `${API_BASE_URL}/rfq/${rfqId}/close`,
+    {
+      method: "POST",
+    }
+  );
   const data = await response.json();
   return data;
 };
