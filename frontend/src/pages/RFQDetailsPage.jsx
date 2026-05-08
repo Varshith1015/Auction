@@ -40,27 +40,32 @@ function RFQDetailsPage({ rfqId, onBack }) {
     };
 
     const handleBidSubmit = async (e) => {
-    e.preventDefault();
+        e.preventDefault();
 
-    try {
-        const response = await submitBid(
-        rfqId,
-        bidForm
-        );
+        try {
+            const response = await submitBid(
+            rfqId,
+            bidForm
+            );
 
-        console.log(response);
+            console.log(response);
 
         alert("Bid submitted successfully");
-
-        const updatedRFQ = await getRFQById(rfqId);
-
-        setRfqDetails(updatedRFQ);
-
-    } catch (error) {
-        console.error(error);
-        alert("Failed to submit bid");
-    }
+            const updatedRFQ = await getRFQById(rfqId);
+            setRfqDetails(updatedRFQ);
+        } catch (error) {
+            console.error(error);
+            alert("Failed to submit bid");
+        }
     };
+    setBidForm({
+        supplier_name: "",
+        freight_charges: "",
+        origin_charges: "",
+        destination_charges: "",
+        transit_time: "",
+        quote_validity: "",
+    });
 
 
   return (
