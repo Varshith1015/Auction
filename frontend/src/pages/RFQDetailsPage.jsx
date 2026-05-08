@@ -54,22 +54,21 @@ function RFQDetailsPage({ rfqId, onBack }) {
                 return;
             }
 
-        alert("Bid submitted successfully");
+            alert("Bid submitted successfully");
+            setBidForm({
+                supplier_name: "",
+                freight_charges: "",
+                origin_charges: "",
+                destination_charges: "",
+                transit_time: "",
+                quote_validity: "",
+            });
             const updatedRFQ = await getRFQById(rfqId);
             setRfqDetails(updatedRFQ);
         } catch (error) {
             console.error(error);
             alert("Failed to submit bid");
         }
-
-        setBidForm({
-            supplier_name: "",
-            freight_charges: "",
-            origin_charges: "",
-            destination_charges: "",
-            transit_time: "",
-            quote_validity: "",
-        });
     };
     
   return (
@@ -173,15 +172,48 @@ function RFQDetailsPage({ rfqId, onBack }) {
         <h3>Supplier Bids</h3>
 
         {bids.length === 0 ? (
-          <p>No bids submitted yet.</p>
-        ) : (
-          bids.map((bid) => (
-            <div key={bid.id}>
-              <p><strong>{bid.rank}</strong> - {bid.supplier_name}</p>
-              <p>Total Amount: {bid.total_amount}</p>
-              <hr />
-            </div>
-          ))
+            <p>No bids submitted yet.</p>
+            ) : (
+            bids.map((bid) => (
+                <div key={bid.id}>
+                <p>
+                    <strong>{bid.rank}</strong> -{" "}
+                    {bid.supplier_name}
+                </p>
+
+                <p>
+                    <strong>Total Amount:</strong>{" "}
+                    {bid.total_amount}
+                </p>
+
+                <p>
+                    <strong>Freight Charges:</strong>{" "}
+                    {bid.freight_charges}
+                </p>
+
+                <p>
+                    <strong>Origin Charges:</strong>{" "}
+                    {bid.origin_charges}
+                </p>
+
+                <p>
+                    <strong>Destination Charges:</strong>{" "}
+                    {bid.destination_charges}
+                </p>
+
+                <p>
+                    <strong>Transit Time:</strong>{" "}
+                    {bid.transit_time}
+                </p>
+
+                <p>
+                    <strong>Quote Validity:</strong>{" "}
+                    {bid.quote_validity}
+                </p>
+
+                <hr />
+                </div>
+            ))
         )}
       </div>
 
@@ -189,15 +221,38 @@ function RFQDetailsPage({ rfqId, onBack }) {
         <h3>Activity Logs</h3>
 
         {logs.length === 0 ? (
-          <p>No activity logs yet.</p>
-        ) : (
-          logs.map((log) => (
-            <div key={log.id}>
-              <p><strong>{log.activity_type}</strong></p>
-              <p>{log.message}</p>
-              <hr />
-            </div>
-          ))
+            <p>No activity logs yet.</p>
+            ) : (
+            logs.map((log) => (
+                <div key={log.id}>
+                <p>
+                    <strong>{log.activity_type}</strong>
+                </p>
+
+                <p>{log.message}</p>
+
+                {log.old_bid_close_time && (
+                    <p>
+                    <strong>Old Close Time:</strong>{" "}
+                    {log.old_bid_close_time}
+                    </p>
+                )}
+
+                {log.new_bid_close_time && (
+                    <p>
+                    <strong>New Close Time:</strong>{" "}
+                    {log.new_bid_close_time}
+                    </p>
+                )}
+
+                <p>
+                    <strong>Created At:</strong>{" "}
+                    {log.created_at}
+                </p>
+
+                <hr />
+                </div>
+            ))
         )}
       </div>
     </div>
